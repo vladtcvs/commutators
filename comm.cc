@@ -48,12 +48,23 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, delta& d)
 
 int delta::operator%(delta d2)
 {
-	if (type != d2.type)
+	if (type == comm_k1 && d2.type != comm_k1)
 		return 0;
+	if (type == comm_k2 && d2.type != comm_k2)
+		return 0;
+	if (type == comm_k3 && d2.type != comm_k5 && d2.type != comm_k3)
+		return 0;
+	if (type == comm_k5 && d2.type != comm_k3 && d2.type != comm_k5)
+		return 0;
+	if (type == comm_k4 && d2.type != comm_k6 && d2.type != comm_k4)
+		return 0;
+	if (type == comm_k6 && d2.type != comm_k4 && d2.type != comm_k6)
+		return 0;
+	
 	if (arg1 == d2.arg1 && arg2 == d2.arg2)
 		return 1;
 	if (arg1 == d2.arg2 && arg2 == d2.arg1) {
-		if (type == comm_k1 || type == comm_k3)
+		if (type == comm_k1 || type == comm_k3 || type == comm_k5)
 			return 1;
 		return -1;
 	}
@@ -255,13 +266,13 @@ coeff commutate(oper op1, oper op2)
 	case oper_d:
 		switch (op2.type) {
 		case oper_a:
-			res.k = -1;
+			res.k = 1;
 			d.type = comm_k2;
 			d.arg1 = op1.argid;
 			d.arg2 = op2.argid;
 			break;
 		case oper_b:
-			res.k = -1;
+			res.k = 1;
 			d.type = comm_k6;
 			d.arg1 = op1.argid;
 			d.arg2 = op2.argid;
@@ -367,7 +378,7 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, monom& mon)
 }
 
 int monom::operator %(monom &m)
-{;
+{
 	if (!(opers % m.opers))
 		return 0;
 	return c % m.c;
@@ -394,37 +405,44 @@ polynom polynom::operator+=(polynom p2)
 		monoms.push_back(*it);
 		it++;
 	}
+	rmdouble();
 	return *this;
 }
 
 void polynom::rmdouble()
 {
-	std::list<monom>::iterator it = monoms.begin();
-	while (it != monoms.end()) {
-		if ((*it).c.k == 0) {
-			std::list<monom>::iterator it_old = it;
-			it++;
-			monoms.erase(it_old);
-		}
-		it++;
-	}
-	it = monoms.begin();
-	while (it != monoms.end()) {
-		std::list<monom>::iterator it2 = it;
-		it2++;
-		while (it2 != monoms.end()) {
-			int cc = (*it)%(*it2);
-			if (cc) {
-				(*it).c.k += (*it2).c.k * cc;
-				std::list<monom>::iterator it_old = it2;
-				it2++;
+	bool nothing;
+	do {
+		nothing = true;
+		std::list<monom>::iterator it = monoms.begin();
+		while (it != monoms.end()) {
+			if ((*it).c.k == 0) {
+				std::list<monom>::iterator it_old = it;
+				it++;
 				monoms.erase(it_old);
-			} else {
-				it2++;
+				nothing = false;
 			}
+			it++;
 		}
-		it++;
-	}
+		it = monoms.begin();
+		while (it != monoms.end()) {
+			std::list<monom>::iterator it2 = it;
+			it2++;
+			while (it2 != monoms.end()) {
+				int cc = (*it)%(*it2);
+				if (cc) {
+					(*it).c.k += (*it2).c.k * cc;
+					std::list<monom>::iterator it_old = it2;
+					it2++;
+					monoms.erase(it_old);
+					nothing = false;
+				} else {
+					it2++;
+				}
+			}
+			it++;
+		}
+	} while (nothing == false);
 }
 
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, polynom& pol)
@@ -448,35 +466,56 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, polynom& po
 polynom commutate(monom J1, monom J2)
 {
 	polynom result;
-	monom m1, m2, m3, m4;
-	m1.opers.first = J1.opers.first;
-	m1.opers.second = J2.opers.second;
-	m1.c = commutate(J1.opers.second, J2.opers.first);
+	monom m1, m2, m3, m4, m5, m6;
+	oper a = J1.opers.first, b = J1.opers.second,
+			c = J2.opers.first, d = J2.opers.second;
+	m1.opers.first = a;
+	m1.opers.second = d;
+	m1.c = commutate(b, c);
 	m1.c *= J1.c;
 	m1.c *= J2.c;
 
-	m2.opers.first = J1.opers.first;
-	m2.opers.second = J2.opers.first;
-	m2.c = commutate(J1.opers.second, J2.opers.second);
+	m2.opers.first = a;
+	m2.opers.second = c;
+	m2.c = commutate(b, d);
 	m2.c *= J1.c;
 	m2.c *= J2.c;
+	m2.c.k /= 2;
 
-	m3.opers.first = J2.opers.second;
-	m3.opers.second = J1.opers.second;
-	m3.c = commutate(J1.opers.first, J2.opers.first);
+	m3.opers.first = d;
+	m3.opers.second = b;
+	m3.c = commutate(a, c);
 	m3.c *= J1.c;
 	m3.c *= J2.c;
+	m3.c.k /= 2;
 	
-	m4.opers.first = J2.opers.first;
-	m4.opers.second = J1.opers.second;
-	m4.c = commutate(J1.opers.first, J2.opers.second);
+	m4.opers.first = c;
+	m4.opers.second = a;
+	m4.c = commutate(b, d);
 	m4.c *= J1.c;
 	m4.c *= J2.c;
+	m4.c.k /= 2;
+
+	m5.opers.first = b;
+	m5.opers.second = d;
+	m5.c = commutate(a, c);
+	m5.c *= J1.c;
+	m5.c *= J2.c;
+	m5.c.k /= 2;
+
+	m6.opers.first = c;
+	m6.opers.second = b;
+	m6.c = commutate(a, d);
+	m6.c *= J1.c;
+	m6.c *= J2.c;
 
 	result.monoms.push_back(m1);
 	result.monoms.push_back(m2);
 	result.monoms.push_back(m3);
 	result.monoms.push_back(m4);
+	result.monoms.push_back(m5);
+	result.monoms.push_back(m6);
+
 	result.rmdouble();
 	return result;
 }
@@ -523,19 +562,43 @@ void test_commutators()
 int main(void)
 {
 	try {
-//		monom J1(0.5, oper_a, 0, oper_b, 0);
-//		monom J2(0.5, oper_c, 1, oper_c, 1);
-//		monom J3(0.5, oper_d, 2, oper_d, 2);
-//		std::cout << "J1: " << J1 << " J2: " << J2 << " J3: " << J3 <<"\n";
+		std::vector<oper_type_e> oper_i = {oper_a, oper_b,
+			oper_c, oper_d};
 
-//		polynom comm = commutate(J2, J1);
-//		std::cout << "[J2, J1] = "<<comm<<"\n";
-
-/*		oper op1(oper_c, 0);
-		oper op2(oper_d, 1);
-		coeff res = commutate(op1, op2);		
-		std::cout<<"[c, d] = "<<res<<"\n";*/
-		test_commutators();
+		for (auto a : oper_i)
+		for (auto b : oper_i) {
+			oper J1(a, 0);
+			oper J2(b, 1);
+			double c;
+			std::cout << "["<<J1<<", "<<J2<<"] = ";
+			coeff com = commutate(J1, J2);
+			std::cout<<com<<" = ";
+			coeff com2 = commutate(J2, J1);
+			std::cout<<com2<<"\n";
+			if (com.k == 0 && com2.k == 0)
+				continue;
+			if (!(c = com % com2))
+				throw "Wrong comm";
+			if (c*com.k != -com2.k)
+				throw "Wrong comm";
+		}
+		
+		for (auto a : oper_i)
+		for (auto b : oper_i)
+		for (auto c : oper_i)
+		for (auto d : oper_i) {
+			monom J1(1, a, 0, b, 1);
+			monom J2(1, c, 2, d, 2);
+			std::cout << "["<<J1<<", "<<J2<<"] = \n";
+			polynom com = commutate(J1, J2);
+			std::cout<<com<<"\n";
+			polynom com2 = commutate(J2, J1);
+			std::cout<<com2<<"\n";
+			com2 += com;
+			std::cout<<com2<<"\n=======\n";
+			if (com2.monoms.size())
+				throw "Wrong comm";
+		}
 	} catch (std::string err) {
 		std::cout << "Error: "<<err<<"\n";
 	}
