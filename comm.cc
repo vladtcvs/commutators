@@ -21,6 +21,8 @@ enum oper_type_e {
 	oper_d,
 };
 
+bool print_full = true;
+
 struct delta {
 	comm_type_e type;
 	int arg1, arg2;
@@ -29,20 +31,43 @@ struct delta {
 
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, delta& d)
 {
-	if (d.type == comm_k2 || d.type == comm_k4 || d.type == comm_k6)
-		ss << "δ'(f";
-	else
-		ss << "δ(f";
-	for (int i = 0; i < d.arg1; i++)
-		ss << "\'";
-	if (d.type == comm_k3 || d.type == comm_k4)
-		ss << "+ɛ";
-	ss << "-f";
-	for (int i = 0; i < d.arg2; i++)
-		ss << "\'";
-	if (d.type == comm_k5 || d.type == comm_k6)
-		ss << "-ɛ";
-	ss <<")";
+	if (print_full) {
+		if (d.type == comm_k2 || d.type == comm_k4 || d.type == comm_k6)
+			ss << "δ'(f";
+		else
+			ss << "δ(f";
+		for (int i = 0; i < d.arg1; i++)
+			ss << "\'";
+		if (d.type == comm_k3 || d.type == comm_k4)
+			ss << "+ɛ";
+		ss << "-f";
+		for (int i = 0; i < d.arg2; i++)
+			ss << "\'";
+		if (d.type == comm_k5 || d.type == comm_k6)
+			ss << "-ɛ";
+		ss <<")";
+	} else {
+		switch(d.type) {
+		case comm_k1:
+			ss<<"k1 ";
+			break;
+		case comm_k2:
+			ss<<"k2 ";
+			break;
+		case comm_k3:
+			ss<<"k3 ";
+			break;
+		case comm_k4:
+			ss<<"k4 ";
+			break;
+		case comm_k5:
+			ss<<"k5 ";
+			break;
+		case comm_k6:
+			ss<<"k6 ";
+			break;
+		}
+	}
 	return ss;
 }
 
@@ -76,7 +101,23 @@ struct coeff {
 	std::vector<delta> deltas;
 	int operator % (coeff c2);
 	coeff operator *= (coeff& c2);
+	void convert();
 };
+
+void coeff::convert()
+{
+	int c = 1;
+	for (auto it = deltas.begin(); it != deltas.end(); it++) {
+		if ((*it).type == comm_k5) { //[c, b]
+			(*it).type = comm_k3;
+		} else if ((*it).type == comm_k6) { // [d, b]
+			(*it).type = comm_k4;
+			c *= -1;
+		}
+	}
+	k *= c;
+}
+
 
 int coeff::operator%(coeff c2)
 {
@@ -176,12 +217,14 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper& op)
 	case oper_none:
 		throw "Uninitialized operator";
 	}
-	ss << "(f";
-	if (op.argid < 0)
-		throw "Uninitialized operator";
-	for (int i = 0; i < op.argid; i++)
-		ss << "\'";
-	ss << ")";
+	if (print_full) {
+		ss << "(f";
+		if (op.argid < 0)
+			throw "Uninitialized operator";
+		for (int i = 0; i < op.argid; i++)
+			ss << "\'";
+		ss << ")";
+	}
 	return ss;
 }
 
@@ -297,11 +340,16 @@ coeff commutate(oper op1, oper op2)
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, coeff& cf)
 {
 	std::vector<delta>::iterator it;
-	ss << cf.k;
-	if (cf.k == 0)
+	if (cf.k == 0) {
+		ss << "0";
 		return ss;
-	if (cf.deltas.size() > 0)
-		ss<<"*";
+	}
+	if (cf.k != 1 && cf.k != -1) {
+		ss << cf.k;
+		if (cf.deltas.size() > 0)
+			ss<<"*";
+	} else if (cf.k == -1)
+		ss << "-";
 	it = cf.deltas.begin();
 	while (it != cf.deltas.end()) {
 		delta d = *it;
@@ -370,10 +418,14 @@ monom::monom(double nc, oper_type_e nt1, int na1, oper_type_e nt2, int na2)
 
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, monom& mon)
 {
-	if (mon.c.k != 0)
-		ss << mon.c << "*" << mon.opers;
-	else
+	if (mon.c.k != 0) {
+		if ((mon.c.k == -1 || mon.c.k == 1) && mon.c.deltas.size() == 0)
+			ss << mon.opers;
+		else
+			ss << mon.c << "*" << mon.opers;
+	} else {
 		ss << "0";
+	}
 	return ss;
 }
 
@@ -422,6 +474,11 @@ void polynom::rmdouble()
 				monoms.erase(it_old);
 				nothing = false;
 			}
+			it++;
+		}
+		it = monoms.begin();
+		while (it != monoms.end()) {
+		//	(*it).c.convert();
 			it++;
 		}
 		it = monoms.begin();
@@ -538,68 +595,62 @@ polynom commutate(polynom p1, polynom p2)
 	return result;
 }
 
-void test_commutators()
+void test1()
 {
-	std::map<int, oper_type_e> opers = {
-		{0, oper_a},
-		{1, oper_b},
-		{2, oper_c},
-		{3, oper_d},
-	};
+	std::vector<oper_type_e> oper_i = {oper_a, oper_b,
+			oper_c, oper_d};
 
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j <= i; j++) {
-			oper op1(opers[i], 0), op2(opers[j], 1);
-			coeff cm1 = commutate(op1, op2);
-			coeff cm2 = commutate(op2, op1);
-			std::cout<<"["<<op1<<", "<<op2<<"] = "<<cm1<<"\n";
-			std::cout<<"["<<op2<<", "<<op1<<"] = "<<cm2<<"\n";
-			std::cout<<"=======\n";
-		}
+	for (auto a : oper_i)
+	for (auto b : oper_i) {
+		oper J1(a, 0);
+		oper J2(b, 1);
+		double c;
+		std::cout << "["<<J1<<", "<<J2<<"] = ";
+		coeff com = commutate(J1, J2);
+		std::cout<<com<<" = ";
+		com.convert();
+		std::cout<<com<<"\n";
+	/*	coeff com2 = commutate(J2, J1);
+		std::cout<<com2<<"\n";
+		if (com.k == 0 && com2.k == 0)
+			continue;
+		if (!(c = com % com2))
+			throw "Wrong comm";
+		if (c*com.k != -com2.k)
+			throw "Wrong comm";*/
+	}
+}
+
+void test2()
+{
+	std::vector<oper_type_e> oper_i = {oper_a, oper_b,
+			oper_c, oper_d};
+
+	for (auto a : oper_i)
+	for (auto b : oper_i)
+	for (auto c : oper_i)
+	for (auto d : oper_i) {
+		monom J1(1, a, 0, b, 1);
+		monom J2(1, c, 2, d, 2);
+		std::cout << "["<<J1<<", "<<J2<<"] = \n";
+		polynom com = commutate(J1, J2);
+		std::cout<<com<<"\n";
+		polynom com2 = commutate(J2, J1);
+		std::cout<<com2<<"\n";
+		com2 += com;
+		std::cout<<com2<<"\n=======\n";
+		if (com2.monoms.size())
+			throw "Wrong comm";
 	}
 }
 
 int main(void)
 {
+// 	print_full = false;
 	try {
-		std::vector<oper_type_e> oper_i = {oper_a, oper_b,
-			oper_c, oper_d};
-
-		for (auto a : oper_i)
-		for (auto b : oper_i) {
-			oper J1(a, 0);
-			oper J2(b, 1);
-			double c;
-			std::cout << "["<<J1<<", "<<J2<<"] = ";
-			coeff com = commutate(J1, J2);
-			std::cout<<com<<" = ";
-			coeff com2 = commutate(J2, J1);
-			std::cout<<com2<<"\n";
-			if (com.k == 0 && com2.k == 0)
-				continue;
-			if (!(c = com % com2))
-				throw "Wrong comm";
-			if (c*com.k != -com2.k)
-				throw "Wrong comm";
-		}
-		
-		for (auto a : oper_i)
-		for (auto b : oper_i)
-		for (auto c : oper_i)
-		for (auto d : oper_i) {
-			monom J1(1, a, 0, b, 1);
-			monom J2(1, c, 2, d, 2);
-			std::cout << "["<<J1<<", "<<J2<<"] = \n";
-			polynom com = commutate(J1, J2);
-			std::cout<<com<<"\n";
-			polynom com2 = commutate(J2, J1);
-			std::cout<<com2<<"\n";
-			com2 += com;
-			std::cout<<com2<<"\n=======\n";
-			if (com2.monoms.size())
-				throw "Wrong comm";
-		}
-	} catch (std::string err) {
+		//test1();
+		test2();
+	} catch (const char* err) {
 		std::cout << "Error: "<<err<<"\n";
 	}
 	
