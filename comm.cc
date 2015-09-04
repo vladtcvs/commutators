@@ -27,7 +27,23 @@ struct delta {
 	comm_type_e type;
 	int arg1, arg2;
 	int operator % (delta d2);
+	int convert();
 };
+
+int delta::convert()
+{
+	int s = 0;
+	if (type == comm_k5 || type == comm_k6) {
+		int arg_t = arg1;
+		arg1 = arg2;
+		arg2 = arg_t;
+		if (type == comm_k5)
+			s = 1;
+		else
+			s = -1;
+	}
+	return s;
+}
 
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, delta& d)
 {
@@ -108,12 +124,9 @@ void coeff::convert()
 {
 	int c = 1;
 	for (auto it = deltas.begin(); it != deltas.end(); it++) {
-		if ((*it).type == comm_k5) { //[c, b]
-			(*it).type = comm_k3;
-		} else if ((*it).type == comm_k6) { // [d, b]
-			(*it).type = comm_k4;
-			c *= -1;
-		}
+		int p = (*it).convert();
+		if (p)
+			c *= p;
 	}
 	k *= c;
 }
@@ -478,7 +491,7 @@ void polynom::rmdouble()
 		}
 		it = monoms.begin();
 		while (it != monoms.end()) {
-		//	(*it).c.convert();
+			(*it).c.convert();
 			it++;
 		}
 		it = monoms.begin();
@@ -646,7 +659,7 @@ void test2()
 
 int main(void)
 {
-// 	print_full = false;
+	print_full = false;
 	try {
 		//test1();
 		test2();
