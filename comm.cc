@@ -22,6 +22,7 @@ enum oper_type_e {
 };
 
 bool print_full = true;
+bool print_tex = true;
 
 struct delta {
 	comm_type_e type;
@@ -48,40 +49,47 @@ int delta::convert()
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, delta& d)
 {
 	if (print_full) {
+		std::string delta = print_tex ? "\\delta" : "δ";
+		std::string eps = print_tex ? "\\epsilon" : "ɛ";
 		if (d.type == comm_k2 || d.type == comm_k4 || d.type == comm_k6)
-			ss << "δ'(f";
+			ss << delta << "'(f";
 		else
-			ss << "δ(f";
+			ss << delta << "(f";
 		for (int i = 0; i < d.arg1; i++)
 			ss << "\'";
 		if (d.type == comm_k3 || d.type == comm_k4)
-			ss << "+ɛ";
+			ss << "+" << eps;
 		ss << "-f";
 		for (int i = 0; i < d.arg2; i++)
 			ss << "\'";
 		if (d.type == comm_k5 || d.type == comm_k6)
-			ss << "-ɛ";
+			ss << "-" << eps;
 		ss <<")";
 	} else {
 		switch(d.type) {
 		case comm_k1:
-			ss<<"k1 ";
+			ss<<"k1";
 			break;
 		case comm_k2:
-			ss<<"k2 ";
+			ss<<"k2";
 			break;
 		case comm_k3:
-			ss<<"k3 ";
+			ss<<"k3";
 			break;
 		case comm_k4:
-			ss<<"k4 ";
+			ss<<"k4";
 			break;
 		case comm_k5:
-			ss<<"k5 ";
+			ss<<"k5";
 			break;
 		case comm_k6:
-			ss<<"k6 ";
+			ss<<"k6";
 			break;
+		}
+		if (print_tex) {
+			ss << "_{"<<d.arg1<<","<<d.arg2<<"}";
+		} else {
+			ss << " ";
 		}
 	}
 	return ss;
@@ -130,7 +138,6 @@ void coeff::convert()
 	}
 	k *= c;
 }
-
 
 int coeff::operator%(coeff c2)
 {
@@ -237,6 +244,8 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper& op)
 		for (int i = 0; i < op.argid; i++)
 			ss << "\'";
 		ss << ")";
+	} else if (print_tex) {
+		ss << "_{" << op.argid << "}";
 	}
 	return ss;
 }
@@ -360,7 +369,7 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, coeff& cf)
 	if (cf.k != 1 && cf.k != -1) {
 		ss << cf.k;
 		if (cf.deltas.size() > 0)
-			ss<<"*";
+			ss << (print_tex ? "\\cdot{}" : "*");
 	} else if (cf.k == -1)
 		ss << "-";
 	it = cf.deltas.begin();
@@ -378,6 +387,52 @@ struct pair {
 	pair();
 	pair(oper_type_e nt1, int na1, oper_type_e nt2, int na2);
 };
+
+struct type_pair {
+	oper_type_e first, second;
+};
+
+std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, type_pair& tp)
+{
+	switch (tp.first) {
+	case oper_a:
+		ss << "a";
+		break;
+	case oper_b:
+		ss << "b";
+		break;
+	case oper_c:
+		ss << "c";
+		break;
+	case oper_d:
+		ss << "d";
+		break;
+	case oper_none:
+		throw "Uninitialized operator";
+	}
+
+	if (!print_tex)
+		ss << " ";
+
+	switch (tp.second) {
+	case oper_a:
+		ss << "a";
+		break;
+	case oper_b:
+		ss << "b";
+		break;
+	case oper_c:
+		ss << "c";
+		break;
+	case oper_d:
+		ss << "d";
+		break;
+	case oper_none:
+		throw "Uninitialized operator";
+	}
+	return ss;
+}
+
 
 pair::pair()
 {}
@@ -406,7 +461,7 @@ int pair::operator%(pair p2)
 
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, pair& p)
 {
-	ss << p.first << "*" << p.second;
+	ss << p.first << (print_tex ? " " : "*") << p.second;
 	return ss;
 }
 
@@ -435,7 +490,7 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, monom& mon)
 		if ((mon.c.k == -1 || mon.c.k == 1) && mon.c.deltas.size() == 0)
 			ss << mon.opers;
 		else
-			ss << mon.c << "*" << mon.opers;
+			ss << mon.c << (print_tex ? "\\cdot{}" : "*") << mon.opers;
 	} else {
 		ss << "0";
 	}
@@ -524,8 +579,12 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, polynom& po
 	}
 	std::list<monom>::iterator mon = pol.monoms.begin();
 	while (mon != pol.monoms.end()) {
-		if (!first)
+		if (!first) {
 			ss << " + ";
+			if (print_tex) {
+				ss << "\\\\ + ";
+			}
+		}
 		ss << (*mon);
 		first = false;
 		mon++;
@@ -617,12 +676,18 @@ void test1()
 	for (auto b : oper_i) {
 		oper J1(a, 0);
 		oper J2(b, 1);
-		double c;
-		std::cout << "["<<J1<<", "<<J2<<"] = ";
+		if (print_tex)
+			std::cout << "\\comm{"<<J1<<"}{"<<J2<<"} = ";
+		else
+			std::cout << "["<<J1<<", "<<J2<<"] = ";
 		coeff com = commutate(J1, J2);
-		std::cout<<com<<" = ";
-		com.convert();
-		std::cout<<com<<"\n";
+		/*std::cout<<com<<" = ";
+		com.convert();*/
+		std::cout<<com;
+		if (print_tex)
+			std::cout << "\\\\\n";
+		else
+			std::cout << "\n";
 	/*	coeff com2 = commutate(J2, J1);
 		std::cout<<com2<<"\n";
 		if (com.k == 0 && com2.k == 0)
@@ -639,33 +704,126 @@ void test2()
 	std::vector<oper_type_e> oper_i = {oper_a, oper_b,
 			oper_c, oper_d};
 
+	/*
+	oper_type_e a, b, c, d;
+	a = oper_a;
+	b = oper_b;
+	c = oper_c;
+	d = oper_c;*/
 	for (auto a : oper_i)
 	for (auto b : oper_i)
 	for (auto c : oper_i)
-	for (auto d : oper_i) {
+	for (auto d : oper_i)
+	{
 		monom J1(1, a, 0, b, 1);
-		monom J2(1, c, 2, d, 2);
-		std::cout << "["<<J1<<", "<<J2<<"] = \n";
+		monom J2(1, c, 2, d, 3);
+		if (print_tex) {
+			std::cout<<"\\begin{eqnarray}\n";
+			std::cout << "\\comm{"<<J1<<"}{"<<J2<<"} = ";
+		} else {
+			std::cout << "["<<J1<<", "<<J2<<"] = ";
+		}
+		
 		polynom com = commutate(J1, J2);
-		std::cout<<com<<"\n";
+		std::cout << com;
+		std::cout << "\n";
+		if (print_tex)
+			std::cout<<"\\end{eqnarray}\n";
 		polynom com2 = commutate(J2, J1);
-		std::cout<<com2<<"\n";
 		com2 += com;
-		std::cout<<com2<<"\n=======\n";
 		if (com2.monoms.size())
 			throw "Wrong comm";
 	}
 }
 
+void find_used()
+{
+	type_pair elem;
+	std::vector<type_pair> used;
+	elem.first = oper_a;
+	elem.second = oper_b;
+	used.push_back(elem);
+	elem.first = oper_c;
+	elem.second = oper_c;
+	used.push_back(elem);
+	elem.first = oper_d;
+	elem.second = oper_d;
+	used.push_back(elem);
+	bool addnew;
+	do {
+		addnew = false;
+		int i, j, sz;
+		sz = used.size();
+		for (i = 1; i < sz && addnew == false; i++)
+		for (j = 0; j < i && addnew == false; j++) {
+			type_pair tp1 = used[i], tp2 = used[j];
+			monom m1, m2;
+			m1.c.k = 1;
+			m1.opers.first.type = tp1.first;
+			m1.opers.first.argid = 0;
+			m1.opers.second.type = tp1.second;
+			m1.opers.second.argid = 1;
+			m2.c.k = 1;
+			m2.opers.first.type = tp2.first;
+			m2.opers.first.argid = 2;
+			m2.opers.second.type = tp2.second;
+			m2.opers.second.argid = 3;
+
+			polynom comm = commutate(m1, m2);
+			for (auto mon : comm.monoms) {
+				type_pair pc;
+				pc.first = mon.opers.first.type;
+				pc.second = mon.opers.second.type;
+				bool find = false;
+				for (int k = 0; k < used.size(); k++) {
+					if (used[k].first == pc.first && used[k].second == pc.second) {
+						find = true;
+						break;
+					}
+				}
+				if (!find) {
+					used.push_back(pc);
+					addnew = true;
+				}
+			}
+		}
+	} while (addnew);
+	std::cout<<"\\begin{eqnarray}";
+	for (unsigned i = 0; i < used.size(); i++) {
+		std::cout << used[i];
+		if (i != used.size() - 1)
+			std::cout << "\\\\";
+		std::cout<<"\n";
+	}
+	std::cout<<"\\end{eqnarray}";
+}
+
 int main(void)
 {
 	print_full = false;
+//	print_tex = false;
+	if (print_tex) {
+		std::cout<<"\\documentclass[12pt]{article}\n";
+		std::cout<<"\\usepackage[russian]{babel}\n";
+		std::cout<<"\\usepackage[T2A]{fontenc}\n";
+		std::cout<<"\\usepackage[utf8]{inputenc}\n";
+		std::cout<<"\\usepackage{graphicx}\n";
+		std::cout<<"\\usepackage[a4paper]{geometry}\n";
+		std::cout<<"\\usepackage{multicol}\n";
+		std::cout<<"\\usepackage{amsmath, amssymb}\n";
+		std::cout<<"\\begin{document}\n";
+		std::cout<<"\\newcommand{\\comm}[2]{\\left[#1, #2\\right]}\n";
+		
+	}
 	try {
 		//test1();
-		test2();
+		//test2();
+		find_used();
 	} catch (const char* err) {
 		std::cout << "Error: "<<err<<"\n";
 	}
-	
+	if (print_tex) {
+		std::cout<<"\\end{document}\n";
+	}
 	return 0;
 }
