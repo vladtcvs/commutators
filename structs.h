@@ -66,12 +66,12 @@ struct arg_pair {
 };
 
 struct ad_item {
-	arg_pair first, second;
+	arg_pair row, col;
 	coeff K;
 };
 
 struct ad {
-	arg_pair used_pair;
+	pair used_pair;
 	ad_item elems[16][16];
 };
 
