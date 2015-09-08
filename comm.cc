@@ -107,8 +107,6 @@ coeff commutate(oper op1, oper op2)
 	case oper_none:
 		throw "Not initialized operator";
 	}
-	res.dpdq.int_dp = false;
-	res.dpdq.int_dq = false;
 	res.deltas.push_back(d);
 	return res;
 }

@@ -128,21 +128,34 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper& op)
 
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, coeff& cf)
 {
+	std::vector<char> vars = {'p', 'q', 'r', 's', 't', 'm', 'n', 'g', 'u', 'w', 'x', 'y', 'z'};
 	std::vector<delta>::iterator it;
 	if (cf.k == 0) {
 		ss << "0";
 		return ss;
 	}
-	if (cf.dpdq.int_dp || cf.dpdq.int_dq) {
+	bool integr = false;
+	for (unsigned i = 0; i < cf.pqr.dvar.size(); i++)
+		if (cf.pqr.dvar[i]) {
+			integr = true;
+			break;
+		}
+	if (integr) {
 		if (print_tex) {
 			ss << "\\int ";
 		} else {
 			ss << "int ";
 		}
-		if (cf.dpdq.int_dp)
-			ss << "dp ";
-		if (cf.dpdq.int_dq)
-			ss << "dq ";
+		for (unsigned i = 0; i < cf.pqr.dvar.size(); i++)
+			if (cf.pqr.used[i] && cf.pqr.dvar[i]) {
+				ss << "d";
+				if (i < vars.size())
+					ss << vars[i];
+				else
+					ss << "v" << i;
+				ss << " ";
+			}
+
 		if (print_tex) {
 			ss << "\\cdot ";
 		} else {

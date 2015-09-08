@@ -144,6 +144,17 @@ int coeff::operator%(coeff c2)
 	return pp;
 }
 
+void coeff::change_argid(int old_aid, int new_aid)
+{
+	std::vector<delta>::iterator it;
+	for (it = deltas.begin(); it != deltas.end(); it++) {
+		if ((*it).arg1 == old_aid)
+			(*it).arg1 = new_aid;
+		if ((*it).arg2 == old_aid)
+			(*it).arg2 = new_aid;
+	}
+}
+
 coeff coeff::operator*=(coeff& c2)
 {
 	k *= c2.k;
@@ -153,6 +164,35 @@ coeff coeff::operator*=(coeff& c2)
 		it++;
 	}
 	return *this;
+}
+
+int extra_vars::new_extra()
+{
+	dvar.push_back(false);
+	used.push_back(false);
+	return -(dvar.size() - 1) - 2;
+}
+
+void coeff_list::rmdouble()
+{
+	bool changed;
+	do {
+		changed = false;
+		std::list<coeff>::iterator it1, it2;
+		for (it1 = cf.begin(); it1 != cf.end(); it1++) {
+			for (it2 = cf.begin(); it2 != it1; it2++) {
+				int p = (*it2)%(*it1);
+				if (p) {
+					changed = true;
+					(*it2).k += (*it1).k * p;
+					cf.erase(it1);
+					goto again;
+				}
+			}
+		}
+		again:
+		; // we need smth arter "again:"
+	} while (changed);
 }
 
 oper::oper()

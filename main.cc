@@ -15,7 +15,6 @@ int main(void)
 		std::cout<<"\\usepackage{amsmath, amssymb}\n";
 		std::cout<<"\\begin{document}\n";
 		std::cout<<"\\newcommand{\\comm}[2]{\\left[#1, #2\\right]}\n";
-		
 	}
 	try {
 		//test1();
@@ -28,7 +27,7 @@ int main(void)
 		for (int j = 0; j < 16; j++)
 		for (int i = 0; i < 16; i++) {
 			type_pair pi(i), pj(j);
-			std::cout << "ad(ab)_{" << pi <<"," << pj << "} = " << ad_ab.elems[i][j].K << "\n"; 
+			std::cout << "ad(ab)_{" << pi <<"," << pj << "} = " << ad_ab.elems[i][j] << "\n"; 
 		}
 	} catch (const char* err) {
 		std::cout << "Error: "<<err<<"\n";

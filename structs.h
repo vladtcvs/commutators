@@ -23,11 +23,6 @@ enum oper_type_e {
 	oper_d,
 };
 
-struct integral {
-	bool int_dp;
-	bool int_dq;
-};
-
 struct delta {
 	comm_type_e type;
 	int arg1, arg2;
@@ -36,13 +31,25 @@ struct delta {
 	int zero();
 };
 
+struct extra_vars {
+	std::vector<bool> dvar;
+	std::vector<bool> used;
+	int new_extra();
+};
+
 struct coeff {
-	integral dpdq;
+	extra_vars pqr;
 	double k;
 	std::vector<delta> deltas;
 	int operator % (coeff c2);
 	coeff operator *= (coeff& c2);
 	void convert();
+	void change_argid(int old_aid, int new_aid);
+};
+
+struct coeff_list {
+	std::list<coeff> cf;
+	void rmdouble();
 };
 
 struct oper {
@@ -65,15 +72,7 @@ struct arg_pair {
 	int aid1, aid2;
 };
 
-struct ad_item {
-	arg_pair row, col;
-	coeff K;
-};
-
-struct ad {
-	pair used_pair;
-	ad_item elems[16][16];
-};
+struct ad;
 
 struct type_pair {
 	oper_type_e first, second;
@@ -83,6 +82,18 @@ struct type_pair {
 	ad find_ad();
 	type_pair();
 	type_pair(int id);
+};
+
+struct ad {
+	type_pair types;
+	arg_pair args1, args2;
+	coeff elems[16][16];
+};
+
+struct killings_form {
+	coeff elems[16][16];
+	type_pair tp;
+	arg_pair arg;
 };
 
 struct monom {
