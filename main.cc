@@ -25,8 +25,8 @@ int main(void)
 		tp.first = oper_a;
 		tp.second = oper_b;
 		ad ad_ab = tp.find_ad();
-		for (int i = 0; i < 16; i++)
-		for (int j = 0; j < 16; j++) {
+		for (int j = 0; j < 16; j++)
+		for (int i = 0; i < 16; i++) {
 			type_pair pi(i), pj(j);
 			std::cout << "ad(ab)_{" << pi <<"," << pj << "} = " << ad_ab.elems[i][j].K << "\n"; 
 		}
