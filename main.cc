@@ -3,7 +3,7 @@
 int main(void)
 {
 //	print_full = false;
-//	print_tex = false;
+	print_tex = false;
 	if (print_tex) {
 		std::cout<<"\\documentclass[12pt]{article}\n";
 		std::cout<<"\\usepackage[russian]{babel}\n";
@@ -19,8 +19,17 @@ int main(void)
 	}
 	try {
 		//test1();
-		test2();
+		//test2();
 		//find_used();
+		type_pair tp;
+		tp.first = oper_a;
+		tp.second = oper_b;
+		ad ad_ab = tp.find_ad();
+		for (int i = 0; i < 16; i++)
+		for (int j = 0; j < 16; j++) {
+			type_pair pi(i), pj(j);
+			std::cout << "ad(ab)_{" << pi <<"," << pj << "} = " << ad_ab.elems[i][j].K << "\n"; 
+		}
 	} catch (const char* err) {
 		std::cout << "Error: "<<err<<"\n";
 	}

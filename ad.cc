@@ -4,7 +4,7 @@ ad type_pair::find_ad()
 {
 	ad adop;
 	monom src(1, first, 0, second, 1);
-	std::vector<oper_type_e> oper_i;
+	std::vector<oper_type_e> oper_i = {oper_a, oper_b, oper_c, oper_d};
 
 	adop.used_pair.first.argid = 0;
 	adop.used_pair.first.type = first;
@@ -25,7 +25,9 @@ ad type_pair::find_ad()
 		col.first = a;
 		col.second = b;
 		int col_id = col.id();
+		//std::cout<<"["<<src<<", "<<item_pair<<"] = ";
 		polynom com = commutate(src, item_pair);
+		//std::cout<<com<<"\n";
 		com.convert_to_std();
 		for (auto mon : com.monoms) {
 			type_pair row;

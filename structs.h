@@ -81,6 +81,8 @@ struct type_pair {
 	int id();
 	void set_id(int nid);
 	ad find_ad();
+	type_pair();
+	type_pair(int id);
 };
 
 struct monom {
@@ -111,6 +113,9 @@ coeff commutate(oper op1, oper op2);
 polynom commutate(monom J1, monom J2);
 polynom commutate(polynom p1, polynom p2);
 
+oper_type_e idop(int id);
+int opid(oper_type_e op);
+
 std::basic_ostream<char>& operator < (std::basic_ostream<char>& ss, int argid);
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, delta& d);
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper& op);
@@ -119,5 +124,6 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, type_pair& 
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, pair& p);
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, monom& mon);
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, polynom& pol);
+std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper_type_e op);
 
 #endif

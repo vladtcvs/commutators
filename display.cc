@@ -80,10 +80,9 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, delta& d)
 	return ss;
 }
 
-
-std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper& op)
+std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper_type_e op)
 {
-	switch (op.type) {
+	switch (op) {
 	case oper_a:
 		ss << "a";
 		break;
@@ -99,6 +98,18 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper& op)
 	case oper_none:
 		throw "Uninitialized operator";
 	}
+	return ss;
+}
+
+std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, type_pair &tp)
+{
+	ss << tp.first << tp.second;
+	return ss;
+}
+
+std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper& op)
+{
+	ss << op.type;
 	if (print_full) {
 		ss << "(" < op.argid;
 		ss << ")";
@@ -150,49 +161,6 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, coeff& cf)
 		delta d = *it;
 		ss << d;
 		it++;
-	}
-	return ss;
-}
-
-
-
-std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, type_pair& tp)
-{
-	switch (tp.first) {
-	case oper_a:
-		ss << "a";
-		break;
-	case oper_b:
-		ss << "b";
-		break;
-	case oper_c:
-		ss << "c";
-		break;
-	case oper_d:
-		ss << "d";
-		break;
-	case oper_none:
-		throw "Uninitialized operator";
-	}
-
-	if (!print_tex)
-		ss << " ";
-
-	switch (tp.second) {
-	case oper_a:
-		ss << "a";
-		break;
-	case oper_b:
-		ss << "b";
-		break;
-	case oper_c:
-		ss << "c";
-		break;
-	case oper_d:
-		ss << "d";
-		break;
-	case oper_none:
-		throw "Uninitialized operator";
 	}
 	return ss;
 }

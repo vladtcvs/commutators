@@ -1,5 +1,16 @@
 #include "structs.h"
 
+type_pair::type_pair()
+{
+	first = oper_none;
+	second = oper_none;
+}
+
+type_pair::type_pair(int id)
+{
+	set_id(id);
+}
+
 int opid(oper_type_e op)
 {
 	return op - 1;
