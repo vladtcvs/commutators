@@ -135,5 +135,18 @@ coeff_list get_trace(type_pair first_type, arg_pair first_arg, type_pair second_
 
 killings_form find_killings_form()
 {
-	
+	killings_form kf;
+	int f_id, s_id;
+	for (f_id = 0; f_id < 16; f_id++)
+	for (s_id = 0; s_id < 16; s_id++) {
+		int base = (f_id*16 + s_id)*4;
+		arg_pair f_arg, s_arg;
+		type_pair f_type(f_id), s_type(s_id);
+		f_arg.aid1 = base;
+		f_arg.aid2 = base + 1;
+		s_arg.aid1 = base + 2;
+		s_arg.aid2 = base + 3;
+		kf.elems[f_id][s_id] = get_trace(f_type, f_arg, s_type, s_arg);
+	}
+	return kf;
 }

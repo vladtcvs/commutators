@@ -136,7 +136,7 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, coeff& cf)
 	}
 	bool integr = false;
 	for (unsigned i = 0; i < cf.pqr.dvar.size(); i++)
-		if (cf.pqr.dvar[i]) {
+		if (cf.pqr.used[i] && cf.pqr.dvar[i]) {
 			integr = true;
 			break;
 		}
@@ -174,6 +174,20 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, coeff& cf)
 		delta d = *it;
 		ss << d;
 		it++;
+	}
+	return ss;
+}
+
+std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, coeff_list& cfl)
+{
+	if (cfl.cf.size() == 0) {
+		ss << "0";
+		return ss;
+	}
+	for (auto it = cfl.cf.begin(); it != cfl.cf.end(); it++) {
+		if (it != cfl.cf.begin())
+			ss << " + ";
+		ss << (*it);
 	}
 	return ss;
 }

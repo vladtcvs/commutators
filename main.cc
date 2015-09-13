@@ -29,6 +29,13 @@ int main(void)
 			type_pair pi(i), pj(j);
 			std::cout << "ad(ab)_{" << pi <<"," << pj << "} = " << ad_ab.elems[i][j] << "\n"; 
 		}
+		killings_form kf = find_killings_form();
+		for (int j = 0; j < 16; j++)
+		for (int i = 0; i < 16; i++) {
+			coeff_list cfl = kf.elems[i][j];
+			type_pair first(i), sec(j);
+			std::cout << "K(" << first << ", " << sec << ") = " <<  cfl << "\n";
+		}
 	} catch (const char* err) {
 		std::cout << "Error: "<<err<<"\n";
 	}

@@ -91,9 +91,9 @@ struct ad {
 };
 
 struct killings_form {
-	coeff elems[16][16];
-	type_pair tp;
-	arg_pair arg;
+	coeff_list elems[16][16];
+	//type_pair tp;
+	//arg_pair arg;
 };
 
 struct monom {
@@ -136,5 +136,8 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, pair& p);
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, monom& mon);
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, polynom& pol);
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper_type_e op);
+std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, coeff_list& cfl);
+
+killings_form find_killings_form();
 
 #endif

@@ -176,9 +176,17 @@ int extra_vars::new_extra()
 void coeff_list::rmdouble()
 {
 	bool changed;
+
 	do {
 		changed = false;
 		std::list<coeff>::iterator it1, it2;
+		for (it1 = cf.begin(); it1 != cf.end(); it1++) {
+			if ((*it1).k == 0) {
+				changed = true;
+				cf.erase(it1);
+				goto again;
+			}
+		}
 		for (it1 = cf.begin(); it1 != cf.end(); it1++) {
 			for (it2 = cf.begin(); it2 != it1; it2++) {
 				int p = (*it2)%(*it1);
