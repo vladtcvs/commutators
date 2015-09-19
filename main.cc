@@ -3,7 +3,7 @@
 int main(void)
 {
 //	print_full = false;
-	print_tex = false;
+//	print_tex = false;
 	if (print_tex) {
 		std::cout<<"\\documentclass[12pt]{article}\n";
 		std::cout<<"\\usepackage[russian]{babel}\n";
@@ -20,7 +20,7 @@ int main(void)
 		//test1();
 		//test2();
 		//find_used();
-		type_pair tp;
+		/*type_pair tp;
 		tp.first = oper_a;
 		tp.second = oper_b;
 		ad ad_ab = tp.find_ad();
@@ -28,13 +28,16 @@ int main(void)
 		for (int i = 0; i < 16; i++) {
 			type_pair pi(i), pj(j);
 			std::cout << "ad(ab)_{" << pi <<"," << pj << "} = " << ad_ab.elems[i][j] << "\n"; 
-		}
+		}*/
 		killings_form kf = find_killings_form();
-		for (int j = 0; j < 16; j++)
-		for (int i = 0; i < 16; i++) {
-			coeff_list cfl = kf.elems[i][j];
-			type_pair first(i), sec(j);
-			std::cout << "K(" << first << ", " << sec << ") = " <<  cfl << "\n";
+		for (int j = 0; j < 16; j++) {
+			std::cout << "\\begin{eqnarray}\n";
+			for (int i = 0; i < 16; i++) {
+				coeff_list cfl = kf.elems[i][j];
+				type_pair first(i), sec(j);
+				std::cout << "K(" << first << ", " << sec << ") = " <<  cfl << "\\\\\n";
+			}
+			std::cout << "\\end{eqnarray}\n";
 		}
 	} catch (const char* err) {
 		std::cout << "Error: "<<err<<"\n";

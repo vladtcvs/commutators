@@ -37,19 +37,17 @@ void test2()
 	std::vector<oper_type_e> oper_i = {oper_a, oper_b,
 			oper_c, oper_d};
 
-	/*
-	oper_type_e a, b, c, d;
-	a = oper_a;
-	b = oper_b;
-	c = oper_c;
-	d = oper_c;*/
 	for (auto a : oper_i)
 	for (auto b : oper_i)
 	for (auto c : oper_i)
 	for (auto d : oper_i)
+	/*oper_type_e a = oper_a;
+	oper_type_e b = oper_b;
+	oper_type_e c = oper_c;
+	oper_type_e d = oper_c;*/
 	{
-		monom J1(1, a, 0, b, 1);
-		monom J2(1, c, 2, d, 3);
+		monom J1(1, a, 0, b, 0);
+		monom J2(1, c, 1, d, 1);
 		if (print_tex) {
 			std::cout<<"\\begin{eqnarray*}\n";
 			std::cout << "\\comm{"<<J1<<"}{"<<J2<<"} = \\\\ =";
