@@ -5,15 +5,15 @@ ad type_pair::find_ad()
 	ad adop;
 	std::vector<oper_type_e> oper_i = {oper_a, oper_b, oper_c, oper_d};
 	type_pair Ji_type = *this;
-	arg_pair Ji_arg, index1_arg, index2_arg;
+	arg_pair x, index1_arg, index2_arg;
 
 	Ji_type.argeq = false;
 
-	Ji_arg.aid1 = 0;
-	Ji_arg.aid2 = 1;
+	x.aid1 = 0;
+	x.aid2 = 1;
 	
 	adop.type = Ji_type;
-	adop.arg = Ji_type;
+	adop.arg = x;
 
 	index1_arg.aid1 = 2;
 	index1_arg.aid2 = 3;
@@ -28,28 +28,35 @@ ad type_pair::find_ad()
 		adop.elems[i][j].k = 0;
 
 	monom Ji(1, adop.type.first, adop.arg.aid1, adop.type.second, adop.arg.aid2);
-	for (auto a : oper_i)
-	for (auto b : oper_i) {
+	for (int j = 0; j < 16; j++) {
 		type_pair Jj_type;
-		Jj_type.first = a;
-		Jj_type.second = b;
+		Jj_type.first = idop(j/4);
+		Jj_type.second = idop(j%4);
 		Jj_type.argeq = false;
 
-		arg_pair Jj_arg;
-		Jj_arg = index2_arg;
+		arg_pair y;
+		y = index2_arg;
 		
-		monom Jj(1, Jj_type.first, Jj_arg.aid1, Jj_type.second, Jj_arg.aid2);
+		monom Jj(1, Jj_type.first, y.aid1, Jj_type.second, y.aid2);
 		polynom com = commutate(Ji, Jj);
 
 		//std::cout<<com<<"\n";
 		com.convert_to_std();
 		for (auto mon : com.monoms) {
 			type_pair com_type;
-			com_type.first = mon.opers.first;
-			com_type.second = mon.opers.second;
+			com_type.first = mon.opers.first.type;
+			com_type.second = mon.opers.second.type;
 			com_type.argeq = false;
 
-			
+			arg_pair z;
+			z.aid1 = mon.opers.first.argid;
+			z.aid2 = mon.opers.second.argid;
+
+			coeff f = mon.c;
+
+			/* So, we have term f * J_{com_type}(arg1, arg2) */
+			int k = com_type.id(); 
+			adop.elems[k][j] = f;
 		}
 	}
 
@@ -102,7 +109,7 @@ int new_extra_int(coeff c1, coeff c2)
 	c2.pqr.used[id] = true;
 	return -id - 2;
 }
-
+/*
 coeff_list get_trace(type_pair first_type, arg_pair first_arg, type_pair second_type, arg_pair second_arg)
 {
 	coeff_list res;
@@ -163,4 +170,4 @@ killings_form find_killings_form()
 		kf.elems[f_id][s_id] = get_trace(f_type, f_arg, s_type, s_arg);
 	}
 	return kf;
-}
+}*/

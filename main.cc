@@ -20,7 +20,7 @@ int main(void)
 		//test1();
 		//test2();
 		//find_used();
-		/*type_pair tp;
+		type_pair tp;
 		tp.first = oper_a;
 		tp.second = oper_b;
 		ad ad_ab = tp.find_ad();
@@ -28,8 +28,8 @@ int main(void)
 		for (int i = 0; i < 16; i++) {
 			type_pair pi(i), pj(j);
 			std::cout << "ad(ab)_{" << pi <<"," << pj << "} = " << ad_ab.elems[i][j] << "\n"; 
-		}*/
-		killings_form kf = find_killings_form();
+		}
+/*		killings_form kf = find_killings_form();
 		for (int j = 0; j < 16; j++) {
 			std::cout << "\\begin{eqnarray}\n";
 			for (int i = 0; i < 16; i++) {
@@ -38,7 +38,7 @@ int main(void)
 				std::cout << "K(" << first << ", " << sec << ") = " <<  cfl << "\\\\\n";
 			}
 			std::cout << "\\end{eqnarray}\n";
-		}
+		}*/
 	} catch (const char* err) {
 		std::cout << "Error: "<<err<<"\n";
 	}
