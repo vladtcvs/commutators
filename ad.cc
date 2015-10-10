@@ -4,38 +4,52 @@ ad type_pair::find_ad()
 {
 	ad adop;
 	std::vector<oper_type_e> oper_i = {oper_a, oper_b, oper_c, oper_d};
+	type_pair Ji_type = *this;
+	arg_pair Ji_arg, index1_arg, index2_arg;
 
-	adop.types.first = first;
-	adop.types.second = second;
-	adop.args1.aid1 = 0;
-	adop.args1.aid2 = 1;
-	adop.args2.aid1 = 2;
-	adop.args2.aid2 = 3;
+	Ji_type.argeq = false;
+
+	Ji_arg.aid1 = 0;
+	Ji_arg.aid2 = 1;
+	
+	adop.type = Ji_type;
+	adop.arg = Ji_type;
+
+	index1_arg.aid1 = 2;
+	index1_arg.aid2 = 3;
+	index2_arg.aid1 = 4;
+	index2_arg.aid2 = 5;
+
+	adop.index_arg_1 = index1_arg;
+	adop.index_arg_2 = index2_arg;
 
 	for (int i = 0; i < 16; i++)
 	for (int j = 0; j < 16; j++)
 		adop.elems[i][j].k = 0;
 
-	monom src(1, adop.types.first, adop.args1.aid1, adop.types.second, adop.args1.aid2);
+	monom Ji(1, adop.type.first, adop.arg.aid1, adop.type.second, adop.arg.aid2);
 	for (auto a : oper_i)
 	for (auto b : oper_i) {
-		monom item_pair(1, a, adop.args2.aid1, b, adop.args2.aid2);
-		type_pair col;
-		col.first = a;
-		col.second = b;
-		int col_id = col.id();
-		//std::cout<<"["<<src<<", "<<item_pair<<"] = ";
-		polynom com = commutate(src, item_pair);
+		type_pair Jj_type;
+		Jj_type.first = a;
+		Jj_type.second = b;
+		Jj_type.argeq = false;
+
+		arg_pair Jj_arg;
+		Jj_arg = index2_arg;
+		
+		monom Jj(1, Jj_type.first, Jj_arg.aid1, Jj_type.second, Jj_arg.aid2);
+		polynom com = commutate(Ji, Jj);
+
 		//std::cout<<com<<"\n";
 		com.convert_to_std();
 		for (auto mon : com.monoms) {
-			type_pair row;
-			row.first = mon.opers.first.type;
-			row.second = mon.opers.second.type;
-			int row_id = row.id();
-			mon.c.change_argid(mon.opers.first.argid, -2);
-			mon.c.change_argid(mon.opers.second.argid, -3);
-			adop.elems[row_id][col_id] = mon.c;
+			type_pair com_type;
+			com_type.first = mon.opers.first;
+			com_type.second = mon.opers.second;
+			com_type.argeq = false;
+
+			
 		}
 	}
 

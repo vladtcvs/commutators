@@ -144,7 +144,7 @@ int coeff::operator%(coeff c2)
 	return pp;
 }
 
-void coeff::change_argid(int old_aid, int new_aid)
+void coeff::substitute(int old_aid, int new_aid)
 {
 	std::vector<delta>::iterator it;
 	for (it = deltas.begin(); it != deltas.end(); it++) {
@@ -171,6 +171,14 @@ int extra_vars::new_extra()
 	dvar.push_back(false);
 	used.push_back(false);
 	return -(dvar.size() - 1) - 2;
+}
+
+void coeff_list::substitute(int old_aid, int new_aid)
+{
+	std::list<coeff>::iterator it;
+	for (it = cf.begin(); it != cf.end(); it++) {
+		(*it).substitute(old_aid, new_aid);
+	}
 }
 
 void coeff_list::rmdouble()

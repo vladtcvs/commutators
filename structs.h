@@ -44,12 +44,13 @@ struct coeff {
 	int operator % (coeff c2);
 	coeff operator *= (coeff& c2);
 	void convert();
-	void change_argid(int old_aid, int new_aid);
+	void substitute(int old_aid, int new_aid);
 };
 
 struct coeff_list {
 	std::list<coeff> cf;
 	void rmdouble();
+	void substitute(int old_aid, int new_aid);
 };
 
 struct oper {
@@ -85,8 +86,10 @@ struct type_pair {
 };
 
 struct ad {
-	type_pair types;
-	arg_pair args1, args2;
+	type_pair type;
+	arg_pair  arg;
+
+	arg_pair index_arg_1, index_arg_2;
 	coeff elems[16][16];
 };
 
