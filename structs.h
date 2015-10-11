@@ -140,6 +140,8 @@ std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, monom& mon)
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, polynom& pol);
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, oper_type_e op);
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, coeff_list& cfl);
+std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, arg_pair args);
+
 
 killings_form find_killings_form();
 

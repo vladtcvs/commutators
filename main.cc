@@ -24,10 +24,24 @@ int main(void)
 		tp.first = oper_a;
 		tp.second = oper_b;
 		ad ad_ab = tp.find_ad();
+		type_pair type = ad_ab.type;
+		arg_pair arg = ad_ab.arg;
+		arg_pair arg_ind_1 = ad_ab.index_arg_1;
+		arg_pair arg_ind_2 = ad_ab.index_arg_2;
+
 		for (int j = 0; j < 16; j++)
 		for (int i = 0; i < 16; i++) {
 			type_pair pi(i), pj(j);
-			std::cout << "ad(ab)_{" << pi <<"," << pj << "} = " << ad_ab.elems[i][j] << "\n"; 
+			std::cout << "ad(J_{";
+			std::cout<<type.first;
+			std::cout<<type.second;
+			std::cout<<"}(";
+			std::cout<arg.aid1;
+			std::cout<<",";
+			std::cout<arg.aid2;	
+			std::cout<<"))_";
+			std::cout<<"{" << pi << arg_ind_1 <<"," << pj << arg_ind_2 << "}";
+			std::cout<<" = " << ad_ab.elems[i][j] << "\n"; 
 		}
 /*		killings_form kf = find_killings_form();
 		for (int j = 0; j < 16; j++) {

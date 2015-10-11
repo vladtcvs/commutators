@@ -21,6 +21,13 @@ std::basic_ostream<char>& operator < (std::basic_ostream<char>& ss, int argid)
 	return ss;
 }
 
+std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, arg_pair args)
+{
+	ss < args.aid1;
+	ss < args.aid2;
+	return ss;
+}
+
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, delta& d)
 {
 	if (print_full) {
