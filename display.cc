@@ -6,9 +6,9 @@ bool print_tex = true;
 std::basic_ostream<char>& operator < (std::basic_ostream<char>& ss, int argid)
 {
 	if (argid >= 0) {
-		ss << "f";
-		for (int i = 0; i < argid; i++)
-			ss << "\'";
+		ss << "f"<<argid;
+		//for (int i = 0; i < argid; i++)
+		//	ss << "\'";
 	} else if (argid == -2) {
 		ss << "p";
 	} else if (argid == -3) {
@@ -23,8 +23,11 @@ std::basic_ostream<char>& operator < (std::basic_ostream<char>& ss, int argid)
 
 std::basic_ostream<char>& operator << (std::basic_ostream<char>& ss, arg_pair args)
 {
+	ss << "(";
 	ss < args.aid1;
+	ss << ",";
 	ss < args.aid2;
+	ss << ")";
 	return ss;
 }
 

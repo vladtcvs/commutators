@@ -37,6 +37,11 @@ struct extra_vars {
 	int new_extra();
 };
 
+struct arg_pair {
+	int aid1, aid2;
+};
+
+
 struct coeff {
 	extra_vars pqr;
 	double k;
@@ -45,6 +50,7 @@ struct coeff {
 	coeff operator *= (coeff& c2);
 	void convert();
 	void substitute(int old_aid, int new_aid);
+	void substitute(arg_pair old_pair, arg_pair new_pair);
 };
 
 struct coeff_list {
@@ -69,9 +75,6 @@ struct pair {
 	pair(oper_type_e nt1, int na1, oper_type_e nt2, int na2);
 };
 
-struct arg_pair {
-	int aid1, aid2;
-};
 
 struct ad;
 

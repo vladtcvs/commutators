@@ -35,7 +35,7 @@ ad type_pair::find_ad()
 		Jj_type.argeq = false;
 
 		arg_pair y;
-		y = index2_arg;
+		y = adop.index_arg_2;
 		
 		monom Jj(1, Jj_type.first, y.aid1, Jj_type.second, y.aid2);
 		polynom com = commutate(Ji, Jj);
@@ -53,7 +53,8 @@ ad type_pair::find_ad()
 			z.aid2 = mon.opers.second.argid;
 
 			coeff f = mon.c;
-
+			f.substitute(z, index1_arg);
+			
 			/* So, we have term f * J_{com_type}(arg1, arg2) */
 			int k = com_type.id(); 
 			adop.elems[k][j] = f;

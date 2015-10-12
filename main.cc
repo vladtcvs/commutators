@@ -35,11 +35,9 @@ int main(void)
 			std::cout << "ad(J_{";
 			std::cout<<type.first;
 			std::cout<<type.second;
-			std::cout<<"}(";
-			std::cout<arg.aid1;
-			std::cout<<",";
-			std::cout<arg.aid2;	
-			std::cout<<"))_";
+			std::cout<<"}";
+			std::cout<<arg;
+			std::cout<<")_";
 			std::cout<<"{" << pi << arg_ind_1 <<"," << pj << arg_ind_2 << "}";
 			std::cout<<" = " << ad_ab.elems[i][j] << "\n"; 
 		}

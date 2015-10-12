@@ -155,6 +155,13 @@ void coeff::substitute(int old_aid, int new_aid)
 	}
 }
 
+void coeff::substitute(arg_pair old_pair, arg_pair new_pair)
+{
+	substitute(old_pair.aid1, new_pair.aid1);
+	substitute(old_pair.aid2, new_pair.aid2);
+}
+
+
 coeff coeff::operator*=(coeff& c2)
 {
 	k *= c2.k;
